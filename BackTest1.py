@@ -110,9 +110,10 @@ def excute_strategy(file, symbol):
             current_price = data['Close'].iloc[i]
             # 当前收益率
             current_return = (current_price - buy_price) / buy_price
-
-            if data['oscillation'].iloc[i] < 0.1 and data['Open'].iloc[i] == data['Close'].iloc[i] and data['Pct Change'].iloc[i] < 0: # 判断是否开盘跌停
+            # 判断是否开盘跌停, 如果一字跌停则当天不可卖出, 开板后直接止损卖出
+            if data['oscillation'].iloc[i] < 0.1 and data['Open'].iloc[i] == data['Close'].iloc[i] and data['Pct Change'].iloc[i] < 0: 
                 oscillation = False
+                continue
             else:
                 oscillation = True
             # 卖出逻辑
@@ -134,10 +135,10 @@ def excute_strategy(file, symbol):
                 oscillation = True
                 continue
             if high_return >= 0.15: #止盈卖出
-                if data['Open'].iloc[i] > data['Close'].iloc[i] and data['Low'].iloc[i] / data['High'].iloc[i] <= 0.95: 
+                if data['Open'].iloc[i] > data['Close'].iloc[i] and data['Low'].iloc[i] / high_price <= 0.95: 
                     take_profit = True
-                if data['Open'].iloc[i] < data['Close'].iloc[i] and high_price != 0 and data['Low'].iloc[i] / high_price <= 0.95:
-                    take_profit = True
+                #if data['Open'].iloc[i] <= data['Close'].iloc[i] and high_price != 0 and data['Low'].iloc[i] / high_price <= 0.95:
+                    #take_profit = True
             # 区间最高价
             if high_price < data['High'].iloc[i]:
                 high_price = data['High'].iloc[i]
@@ -223,7 +224,7 @@ def main():
     print(f"Average Profit per Trade: {average_profit:.2f}%")
     
     # 统计收益曲线
-    statistical_income()
+    #statistical_income()
     end_time = time.time()  # 记录结束时间
     elapsed_time = end_time - start_time  # 计算运行时间
     print(f"代码运行总时间: {elapsed_time:.2f} 秒")
